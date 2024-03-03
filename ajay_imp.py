@@ -203,11 +203,10 @@ def get_lyrics(api_path, access_token):
                 print(clean_snippet, 'clean_snippet')
                 lyrics += clean_snippet.strip() + '\n\n'
 
+    print(lyrics)
     if not lyrics:
         return None
     lyrics, sections = clean_lyrics(lyrics.strip())
-
-    print(lyrics, sections)
     return lyrics, sections
     #if is_english(lyrics):
     #    return lyrics, sections
@@ -224,7 +223,6 @@ def clean_lyrics(lyrics):
     current_lyrics = []
 
     for line in lines:
-        print(line, 'is a line')
         line = re.sub(r'\(.*?\)', '', line) # remove all words in parentheses
         if line.startswith('[') and line.endswith(']'): # if the line is a section title
             if current_section is not None: # if there's a current section
@@ -323,4 +321,4 @@ if __name__ == '__main__':
     # with open('songs_v2.json', 'w') as f:
     #     json.dump(songs, f)
                 
-    print(get_song_lyrics("Lupe Fiasco", "Black SkinHead", ACCESS_TOKEN))
+    get_lyrics("/songs/670091", ACCESS_TOKEN)
