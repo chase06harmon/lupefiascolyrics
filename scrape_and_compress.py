@@ -46,6 +46,7 @@ def request_song_url(artist_name, song_cap):
             break
         else:
             page += 1
+        print('Found {} songs by {}'.format(len(songs), artist_name))
         
     print('Found {} songs by {}'.format(len(songs), artist_name))
     return songs
@@ -92,10 +93,30 @@ def compress_data(commpressed_file, file_to_compress):
     with tarfile.open(commpressed_file, 'w:gz') as tar: 
         tar.add(file_to_compress)
 
+def clean_data(data_file):
+    count = 0
+
+    with open(data_file, "r") as f:
+        for line in f:
+            line_dict = json.loads(line.strip())
+            if len(line_dict.get("lyrics")) < 150:
+                count+=1
+                print(line_dict)
+    print(count)
+                # non_empty_lines.append(line_dict)
+
+    # with open(data_file, "w") as f:
+    #     for line in non_empty_lines:
+    #         f.write(json.dumps(line) + '\n')
+                
+
+
 if __name__ == "__main__":
     jsonl_filename = "dataset.jsonl"
     tar_filename = "dataset.tar.gz"
     artist_name = "Lupe Fiasco"
-    num_songs = 2
-    write_lyrics_to_file(artist_name, 1, jsonl_filename)
+    num_songs = 431
+    # write_lyrics_to_file(artist_name, num_songs, jsonl_filename)
     compress_data(tar_filename, jsonl_filename)
+    
+    # clean_data(jsonl_filename)

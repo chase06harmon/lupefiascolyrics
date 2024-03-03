@@ -47,34 +47,11 @@ articles, where the answer to every question is a segment of text, or span, \
 from the corresponding reading passage, or the question might be unanswerable.
 """
 
-_URL = "https://rajpurkar.github.io/SQuAD-explorer/dataset/"
-_URLS = {
-    "train": _URL + "train-v1.1.json",
-    "dev": _URL + "dev-v1.1.json",
-}
+_URL = "dataset.tar.gz"
 
 
-class SquadConfig(datasets.BuilderConfig):
-    """BuilderConfig for SQUAD."""
-
-    def __init__(self, **kwargs):
-        """BuilderConfig for SQUAD.
-        Args:
-          **kwargs: keyword arguments forwarded to super.
-        """
-        super(SquadConfig, self).__init__(**kwargs)
-
-
-class Squad(datasets.GeneratorBasedBuilder):
+class LupeLyrics(datasets.GeneratorBasedBuilder):
     """SQUAD: The Stanford Question Answering Dataset. Version 1.1."""
-
-    BUILDER_CONFIGS = [
-        SquadConfig(
-            name="plain_text",
-            version=datasets.Version("1.0.0", ""),
-            description="Plain text",
-        ),
-    ]
 
     def _info(self):
         return datasets.DatasetInfo(
@@ -106,7 +83,7 @@ class Squad(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        downloaded_files = dl_manager.download_and_extract(_URLS)
+        downloaded_files = dl_manager.download_and_extract(_URL)
 
         return [
             datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": downloaded_files["train"]}),
