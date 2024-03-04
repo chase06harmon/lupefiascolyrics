@@ -1,5 +1,5 @@
-GENIUS_API_TOKEN='Syj2Kk9BJSkayL2Rs9CnAZJpG2Sjr_oq3_WEwHKUnVZyJ87zZuvYf2DTC1Cvt-us'
-OPEN_AI_TOKEN='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'
+GENIUS_API_TOKEN='TOKEN'
+OPEN_AI_TOKEN='TOKEN'
 
 # Make HTTP requests
 import requests
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     tar_filename = "dataset.tar.gz"
     artist_name = "Lupe Fiasco"
     num_songs = 535
-    # write_lyrics_to_file(artist_name, num_songs, jsonl_filename)
-    # # compress_data(tar_filename, jsonl_filename)
-    # clean_data(jsonl_filename)
+    write_lyrics_to_file(artist_name, num_songs, jsonl_filename)
+    clean_data(jsonl_filename)
+    compress_data(tar_filename, jsonl_filename)
     # print(get_all_songs())

@@ -46,8 +46,6 @@ class LupeLyrics(datasets.GeneratorBasedBuilder):
                     "tite": datasets.Value("string"),
                     "lyrics": datasets.Value("string"),
                     "summary": datasets.Value("string"),
-                    "id": datasets.features.Value("string"),
-                    "created_utc": datasets.features.Value("float32")
                 }
             ),
             # No default supervised_keys (as we have to pass both question
