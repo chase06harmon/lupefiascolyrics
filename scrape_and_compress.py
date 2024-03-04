@@ -122,7 +122,7 @@ if __name__ == "__main__":
     tar_filename = "dataset.tar.gz"
     artist_name = "Lupe Fiasco"
     num_songs = 535
-    write_lyrics_to_file(artist_name, num_songs, jsonl_filename)
-    clean_data(jsonl_filename)
+    # write_lyrics_to_file(artist_name, num_songs, jsonl_filename)
+    # clean_data(jsonl_filename)
     compress_data(tar_filename, jsonl_filename)
     # print(get_all_songs())
