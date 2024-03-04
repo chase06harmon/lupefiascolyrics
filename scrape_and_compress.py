@@ -1,5 +1,5 @@
 GENIUS_API_TOKEN='Syj2Kk9BJSkayL2Rs9CnAZJpG2Sjr_oq3_WEwHKUnVZyJ87zZuvYf2DTC1Cvt-us'
-OPEN_AI_TOKEN='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'
+OPEN_AI_TOKEN='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'
 
 # Make HTTP requests
 import requests
@@ -23,9 +23,10 @@ def request_artist_info(artist_name, page):
     return response
 
 # Get Genius.com song url's from artist object
-def request_song_url(artist_name, song_cap):
+def request_song_info(artist_name, song_cap):
     page = 1
     songs = []
+    titles = []
     
     while True:
         response = request_artist_info(artist_name, page)
@@ -33,7 +34,7 @@ def request_song_url(artist_name, song_cap):
         # Collect up to song_cap song objects from artist
         song_info = []
         for hit in json['response']['hits']:
-            if artist_name.lower() in hit['result']['primary_artist']['name'].lower():
+            if artist_name.lower() in hit['result']['artist_names'].lower():
                 song_info.append(hit)
     
         # Collect song URL's from song objects
@@ -41,7 +42,8 @@ def request_song_url(artist_name, song_cap):
             if (len(songs) < song_cap):
                 url = song['result']['url']
                 songs.append(url)
-            
+                title = song['result']['title']
+                titles.append(title)
         if (len(songs) == song_cap):
             break
         else:
@@ -49,7 +51,7 @@ def request_song_url(artist_name, song_cap):
         print('Found {} songs by {}'.format(len(songs), artist_name))
         
     print('Found {} songs by {}'.format(len(songs), artist_name))
-    return songs
+    return zip(songs,titles)
     
 def scrape_song_lyrics(url):
     page = requests.get(url)
@@ -66,13 +68,12 @@ def scrape_song_lyrics(url):
     return lyrics
 
 
-
-
 def write_lyrics_to_file(artist_name, song_count, filename):
-    urls = request_song_url(artist_name, song_count)
+    song_infos = request_song_info(artist_name, song_count)
     client = OpenAI(api_key=OPEN_AI_TOKEN)
     with open(filename, 'w') as f:
-        for num, url in enumerate(urls):
+        for num, song_info in enumerate(song_infos):
+            url, title = song_info
             lyrics = scrape_song_lyrics(url)
             chat_completion = client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -81,7 +82,7 @@ def write_lyrics_to_file(artist_name, song_count, filename):
                 ]
             )
             summary = chat_completion.choices[0].message.content
-            json_object = {"lyrics": lyrics, "summary": summary}
+            json_object = {"title": title, "lyrics": lyrics, "summary": summary}
             f.write(json.dumps(json_object) + '\n')
             numTicks = int(100/song_count * (num+1))
             print(f'Loading [ {"|" * numTicks}{" " * (100 - numTicks)}]', end='\r')
@@ -94,29 +95,34 @@ def compress_data(commpressed_file, file_to_compress):
         tar.add(file_to_compress)
 
 def clean_data(data_file):
-    count = 0
+    non_empty_lines = []
 
     with open(data_file, "r") as f:
         for line in f:
             line_dict = json.loads(line.strip())
-            if len(line_dict.get("lyrics")) < 150:
-                count+=1
-                print(line_dict)
-    print(count)
-                # non_empty_lines.append(line_dict)
+            if line_dict.get("lyrics"): 
+                non_empty_lines.append(line_dict)
+    with open(data_file, "w") as f:
+        for line in non_empty_lines:
+            f.write(json.dumps(line) + '\n')
 
-    # with open(data_file, "w") as f:
-    #     for line in non_empty_lines:
-    #         f.write(json.dumps(line) + '\n')
-                
+def get_all_songs():
+    page = requests.get("https://lupefiasco.fandom.com/wiki/List_of_songs")
+    soup = BeautifulSoup(page.text, 'html.parser')
+    titles = set()
+    for td in soup.find_all('td'):  # Adjust if your structure differs
+        a = td.find('a')  # Find the 'a' element within each 'td'
+        if a:
+            titles.add(a.text.lower())  # Add the text (which is the title) to the list
+    return titles
 
 
 if __name__ == "__main__":
     jsonl_filename = "dataset.jsonl"
     tar_filename = "dataset.tar.gz"
     artist_name = "Lupe Fiasco"
-    num_songs = 431
+    num_songs = 535
     # write_lyrics_to_file(artist_name, num_songs, jsonl_filename)
-    compress_data(tar_filename, jsonl_filename)
-    
+    # # compress_data(tar_filename, jsonl_filename)
     # clean_data(jsonl_filename)
+    # print(get_all_songs())
