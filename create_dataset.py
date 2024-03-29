@@ -43,7 +43,7 @@ class LupeLyrics(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "tite": datasets.Value("string"),
+                    "title": datasets.Value("string"),
                     "lyrics": datasets.Value("string"),
                     "summary": datasets.Value("string"),
                 }

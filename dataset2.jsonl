@@ -1,0 +1,27 @@
+song_title,lyrics,prompt
+Mural,[,"""Sorry, but it's a fact that I'm infallible,
+My tracks are impeccable, and I'm a national treasure,
+It's actual, undeniable, and I'm a rap pedestal,
+My raps are impeccable, and I'm a fashion rebel."""
+Mural,V,Write a verse in the style of Eminem discussing the struggles and challenges of growing up in a broken home.
+Mural,e,Write a verse in the style of Eminem reflecting on the struggles and challenges of growing up in a rough neighborhood.
+Mural,r,"I'm on top of the world, never looking down
+    Hustling hard, making moves all around
+    Money on my mind, success in my sight
+    Living life large, shining bright like a light"
+Mural,s,"""I got the world on my shoulders, but I'm still standing tall"" - J. Cole
+
+Write a hook in the style of J. Cole about overcoming adversity and staying strong."
+Mural,e,"Save money, live better, got a mind full of chatter, give 'em hell like a champion, change and save me, change and save me. 
+
+    # Generate a prompt:
+
+    Write a verse in the style of Travis Scott exploring the struggles of balancing success and personal demons."
+Mural, ,"I've been through the struggle, but I never back down
+
+    Write a verse in the style of DMX reflecting on the hardships and challenges he has faced."
+Mural,1,"I pop bottles in the club, but I still remember where I come from
+
+    Create a verse in the style of Drake reflecting on the struggle of balancing fame and staying true to your roots."
+Mural,],"
+    Write a verse in the style of Eminem discussing the struggles of addiction and recovery."
