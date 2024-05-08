@@ -1,5 +1,5 @@
-GENIUS_API_TOKEN=TOKEN
-OPEN_AI_TOKEN=OTHER_TOKEN
+GENIUS_API_TOKEN='TOKEN'
+OPEN_AI_TOKEN='TOKEN'
 
 
 def gpt_prompt(lyrics):
@@ -48,6 +48,7 @@ import json
 from openai import OpenAI
 import tarfile
 import csv
+import pandas as pd
 
 # Get artist object from Genius API
 def request_artist_info(artist_name, page):
@@ -65,16 +66,15 @@ def request_song_info(artist_name):
     titles = []
     artists = []
     while True:
+        if page == 101: # Genuis only loads 1000 search results max. Does a thorough search.
+            break
         response = request_artist_info(artist_name, page)
         json = response.json()
         # Collect up to song_cap song objects from artist
         song_info = []
         for hit in json['response']['hits']:
-            if artist_name.lower() in hit['result']['artist_names'].lower():
+            if artist_name.lower() ==  hit['result']['primary_artist']["name"].lower() or any([artist_name.lower() == featured['name'].lower() for featured in hit['result']['featured_artists']]):
                 song_info.append(hit)
-        
-        if len(songs) >= 3: # no new songs
-            break
 
         # Collect song URL's from song objects
         for song in song_info:
@@ -84,7 +84,7 @@ def request_song_info(artist_name):
             titles.append(title)
             artists.append(artist_name)
         page += 1
-        print('Found {} songs by {}'.format(len(songs), artist_name))
+        print('Found {} songs by {}'.format(len(songs), artist_name), end='\r')
         
     print('There are {} songs by {} available on Genuis API'.format(len(songs), artist_name))
     return list(zip(songs,titles,artists))
@@ -92,7 +92,7 @@ def request_song_info(artist_name):
 def scrape_song_lyrics(url, artist_name):
     page = requests.get(url)
     soup = BeautifulSoup(page.text, 'html.parser')
-    pattern = re.compile(r'(\[.*?\])')
+    pattern = re.compile(r'(\[(?!\?|x\s?[0-9]\]).*?\])')
     lyrics = ''
     for elem in soup.find_all('div', class_=lambda value: value and value.startswith("Lyrics__Container")):
         # print(elem.decode_contents())
@@ -110,7 +110,7 @@ def scrape_song_lyrics(url, artist_name):
         next_section = sections[idx+1]
         if re.search(pattern, current_section) and "Produced" not in current_section and next_section: # the current idx is a valid section header and there is lyrics following it
             if ":" not in current_section:
-                current_section = current_section + f": {artist_name}"
+                current_section = current_section[0:-1] + f": {artist_name}" + current_section[-1]
             results.append(current_section + next_section)
     return results
 
@@ -118,8 +118,24 @@ def scrape_song_lyrics(url, artist_name):
 def write_lyrics_to_file(artist_names, filename):
     song_infos = []
     artist_infos = []
-    for artist_name in artist_names: 
-        song_infos.extend(request_song_info(artist_name))
+    song_file = "songs_list.csv"
+    if not os.path.isfile(song_file):
+        for artist_name in artist_names: 
+            song_infos.extend(request_song_info(artist_name))
+
+        # Convert the list of tuples into a CSV format string
+        csv_content = '\n'.join([','.join(map(str, item)) for item in song_infos])
+        # Write the CSV string to a file
+        with open(song_file, 'w', encoding="utf-8") as file:
+            file.write(csv_content)
+    else: 
+        df = pd.read_csv(song_file, header=None, names=['URL', 'Title', 'Artist'])
+    
+        songs = df['URL'][3150:]
+        titles = df['Title'][3150:]
+        artists = df['Artist'][3150:]
+        song_infos = list(zip(songs,titles,artists))
+
     client = OpenAI(api_key=OPEN_AI_TOKEN)
     num_songs = len(song_infos)
     print(f"Synthesizing {num_songs} songs to {filename}")
@@ -175,8 +191,11 @@ if __name__ == "__main__":
     jsonl_filename = "dataset.jsonl"
     csv_filename = "train.csv"
     tar_filename = "dataset.tar.gz"
-    artist_names = ["Lupe Fiasco", "Common"]
+    artist_names = ["Lupe Fiasco", "Common", "Jay-Z", "Yasiin Bey", "Ab-Soul", "Rakim", "Ghostface Killah", "Talib Kweli", "2Pac"]
     write_lyrics_to_file(artist_names, csv_filename)
+    # pattern = re.compile(r'(\[(?!\?|x\s?[0-9]\]).*?\])')
+    # text = "[Verse 1: Rakim] Yeah, yeah [Hook] This is [x3] the hook [Bridge: Kelsey Floyd] Bridge section"
+    # print(re.split(pattern, text))
     # with open(csv_filename, 'r', encoding='utf-8') as csvfile:
     #     reader = csv.reader(csvfile)
     #     for row in reader:
